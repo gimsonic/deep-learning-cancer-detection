@@ -1,0 +1,27 @@
+# --- DATA & LARGE FILES ---
+# Ignore the entire data folder where images located
+ai_core/data/
+
+# Specifically ignore large binary formats
+*.tfrecords
+*.npy
+*.zip
+*.tar.gz
+*.keras
+
+# --- PYTHON & ENVIRONMENT ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv*/
+.env
+
+# --- OS SPECIFIC ---
+.DS_Store
+Thumbs.db
+
+backend/models/*.keras
+backend/models/*.h5
+ai_core/
+docs/

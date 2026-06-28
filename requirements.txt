@@ -1,0 +1,29 @@
+# --- Deep Learning Core (Choose TensorFlow OR PyTorch) ---
+# For this project, we recommended TensorFlow/Keras in the previous step
+tensorflow==2.19.0      # Main library for creating CNNs and loading ResNet/MobileNet
+# torch==2.1.2          # (Optional) Uncomment if using PyTorch instead
+# torchvision==0.16.2   # (Optional) Image transformations for PyTorch
+
+# --- Data Handling & Math ---
+numpy==1.26.2           # Essential for matrix operations (converting images to arrays)
+pandas==2.1.4           # For managing metadata (e.g., patient ID, diagnosis CSVs)
+
+# --- Image Processing ---
+opencv-python==4.9.0.80 # For resizing, noise reduction, and advanced image edits
+Pillow==10.1.0          # Python Imaging Library (basic image loading/saving)
+
+# --- Visualization & Evaluation ---
+matplotlib==3.8.2       # For plotting training graphs (accuracy vs epochs)
+seaborn==0.13.0         # For creating nice Confusion Matrices (Heatmaps)
+scikit-learn==1.3.2     # For calculating Precision, Recall, Specificity, and AUC
+
+# --- Web Application (For the Prototype Phase) ---
+Flask==3.0.0            # Lightweight framework to build the web interface
+werkzeug==3.0.1         # Utilities for secure file uploads (images)
+fastapi==0.115.6        # Backend API framework used by run.py/app.main
+uvicorn[standard]==0.32.1  # ASGI server used to run the FastAPI app
+python-multipart==0.0.17   # Required for Form/File upload handling in FastAPI
+
+# --- Utilities ---
+jupyter                 # To run .ipynb notebooks locally
+tqdm                    # Shows progress bars during long training loops

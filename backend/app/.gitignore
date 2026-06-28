@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment files
+.env
+.env.*
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter / notebooks
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+
+# FastAPI / runtime cache
+*.sqlite3
+
+# Model files
+models/*.keras
+models/*.h5
+models/*.pb
+models/*.pt
+models/*.pth
+
+# Uploaded/generated files
+uploads/
+temp/
+tmp/
+
+# export results
+*.csv
+*.xlsx
+*.png
