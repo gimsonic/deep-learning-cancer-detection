@@ -8,6 +8,8 @@ ai_core/data/
 *.zip
 *.tar.gz
 *.keras
+*.docx
+*.html
 
 # --- PYTHON & ENVIRONMENT ---
 __pycache__/
