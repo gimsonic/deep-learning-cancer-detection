@@ -178,8 +178,8 @@ async def predict_cancer(
                 mask = counts > 0
                 heatmap[mask] /= counts[mask]
                 
-                # Apply strong Gaussian blur to smooth out the blocky patches
-                heatmap = cv2.GaussianBlur(heatmap, (151, 151), 0)
+                # Apply massive Gaussian blur to smooth the blocky patches into a natural "cloud"
+                heatmap = cv2.GaussianBlur(heatmap, (251, 251), 0)
                 
                 # Create the colored heatmap (JET colormap)
                 heatmap_normalized = (heatmap * 255).astype(np.uint8)
@@ -188,9 +188,9 @@ async def predict_cancer(
                 original_bgr = cv2.cvtColor(resized, cv2.COLOR_GRAY2BGR)
                 
                 # Create dynamic transparency mask:
-                # Normal areas (heat < 0.2) become fully transparent (alpha = 0)
-                # Suspicious areas scale up to 60% opacity (alpha = 0.6)
-                alpha_mask = np.clip((heatmap - 0.2) / 0.4, 0, 1.0) * 0.6
+                # We want healthy tissue (blue/green, heat < 0.45) to be COMPLETELY invisible.
+                # Only suspicious areas (yellow/red, heat > 0.45) should show up!
+                alpha_mask = np.clip((heatmap - 0.4) / 0.4, 0, 1.0) * 0.85
                 alpha_mask = np.expand_dims(alpha_mask, axis=-1)
                 
                 # Fix ugly edges: Create a tissue mask to stop the heatmap from bleeding into the black background
