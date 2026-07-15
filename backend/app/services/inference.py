@@ -25,7 +25,7 @@ _registry: dict = {}
 
 # Remove keys like 'quantization_config' due to local environment
 # could not deserialize them
-_COMPAT_STRIP_KEYS = ("quantization_config",)
+_COMPAT_STRIP_KEYS = ("quantization_config", "input_axes", "output_axes")
 
 # Cleans the model config before Keras loads it
 # (Remove unsupported keys from obj/Dict)
@@ -73,13 +73,16 @@ def _load_model_compat(model_path: Path, tf):
             tmp.write(buf.getvalue())
             tmp_path = tmp.name
 
-         # Now load the model from the in-memory zip file
+        # Now load the model from the in-memory zip file
         try:
             # Load the model from the temporary file containing the fixed config
             return tf.keras.models.load_model(tmp_path, compile=False, safe_mode=False)
         finally:
             # Clean up the temporary file after loading the model
-            os.unlink(tmp_path)
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
 
     # If any error occurs during this process, catch it and attempt to load the model without the compatibility fix as a fallback
     # (zip file issues, JSON parsing, TensorFlow loading)
@@ -108,7 +111,7 @@ def load_models() -> None:
             _registry[cancer_type] = {}
 
             # For each stage (stage1 and stage2), check if the model file exists. If it does, attempt to load it with compatibility fixes. If it doesn't exist or fails to load, log a warning and set that stage's model to None in the registry.
-            for stage in ("stage1", "stage2"):
+            for stage in ("stage1", "stage2", "stage3"):
                 # Skip stages that are not configured (e.g. single-stage cancer types)
                 if cfg.get(stage) is None:
                     print(f"[INFO]  Skipped {cancer_type}/{stage}  — not configured (single-stage mode)")
@@ -257,6 +260,42 @@ def predict(cancer_type: str, image_array: np.ndarray) -> dict:
         "stage2_confidence": s2["confidence"],
         "is_mock": s1["is_mock"] or s2["is_mock"],
         "message": "Suspicious abnormality detected.",
+    }
+
+
+def predict_histopathology(image_array: np.ndarray) -> dict:
+    """
+    Run the Stage 3 histopathology model for oral cancer.
+    Accepts a preprocessed image array and returns a classification result.
+    Falls back to mock mode if the model is not loaded.
+    """
+    cfg = CANCER_CONFIGS.get("oral")
+    if cfg is None:
+        raise ValueError("Oral cancer config not found")
+
+    s3_cfg = cfg.get("stage3")
+    if s3_cfg is None:
+        raise ValueError("Stage 3 histopathology not configured for oral cancer")
+
+    model = _registry.get("oral", {}).get("stage3")
+    result = _run_stage(model, image_array, s3_cfg["threshold"], s3_cfg["classes"])
+
+    label = result["label"]
+    confidence = result["confidence"]
+    is_mock = result["is_mock"]
+
+    if is_mock:
+        message = "Histopathology model not loaded — showing placeholder result."
+    elif label == "malignant":
+        message = f"Histopathology confirms malignancy ({confidence * 100:.1f}% confidence)."
+    else:
+        message = f"Histopathology indicates benign tissue ({confidence * 100:.1f}% confidence)."
+
+    return {
+        "label": label,
+        "confidence": confidence,
+        "is_mock": is_mock,
+        "message": message,
     }
 
 

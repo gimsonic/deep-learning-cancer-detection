@@ -22,3 +22,11 @@ class PredictionResponse(BaseModel):
     
     # Visual heatmap overlay (base64 string)
     annotated_image: Optional[str] = None
+
+
+class HistopathologyResponse(BaseModel):
+    """Response schema for Stage 3 oral cancer histopathology analysis."""
+    label: str              # "benign" or "malignant"
+    confidence: float
+    is_mock: bool = False
+    message: str

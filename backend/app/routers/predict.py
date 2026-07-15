@@ -6,7 +6,7 @@ from app.utils.super_preprocessor import SuperPreprocessor
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from app.config import CANCER_CONFIGS, SUPPORTED_CANCER_TYPES
-from app.schemas import PredictionResponse
+from app.schemas import PredictionResponse, HistopathologyResponse
 from app.services import inference
 from app.utils.image_preprocess import preprocess_image
 
@@ -221,3 +221,37 @@ async def predict_cancer(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+
+
+# ── Stage 3: Oral Cancer Histopathology ──
+@router.post("/histopathology", response_model=HistopathologyResponse)
+async def predict_histopathology(
+    file: UploadFile = File(..., description="Histopathology image (JPEG, PNG, TIFF)"),
+):
+    """
+    Stage 3 analysis for oral cancer.
+    Accepts a histopathology slide image and classifies it as benign or malignant
+    using the dedicated histopathology deep learning model.
+    """
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="Please upload a valid image file (JPEG, PNG, TIFF).",
+        )
+
+    try:
+        oral_cfg = CANCER_CONFIGS["oral"]
+        file_bytes = await file.read()
+
+        # Preprocess using the same image settings as oral Stage 1/2
+        image_array = preprocess_image(
+            file_bytes,
+            image_size=oral_cfg["image_size"],
+            image_mode=oral_cfg["image_mode"],
+        )
+
+        result = inference.predict_histopathology(image_array)
+        return HistopathologyResponse(**result)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Histopathology analysis failed: {str(e)}")
