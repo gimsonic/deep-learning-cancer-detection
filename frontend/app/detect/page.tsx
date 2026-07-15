@@ -143,16 +143,24 @@ function AnalysisOverlay() {
 /* ─── Histopathology Stage 3 card (Oral Cancer only) ─── */
 function HistoStage3Card({
   active, histoFile, histoPreview, onFileSelect, onRemove, inputRef,
+  onAnalyze, histoLoading, histoResult,
 }: {
   active: boolean; histoFile: File | null; histoPreview: string | null;
   onFileSelect: (f: File) => void; onRemove: () => void;
   inputRef: { current: HTMLInputElement | null };
+  onAnalyze: () => void;
+  histoLoading: boolean;
+  histoResult: { label: string; confidence: number; is_mock: boolean; message: string } | null;
 }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     if (active) { const t = setTimeout(() => setVisible(true), 600); return () => clearTimeout(t); }
     else { setVisible(false); }
   }, [active]);
+
+  const resultTheme = histoResult?.label === "malignant"
+    ? { bg: "bg-rose-50", border: "border-rose-200", text: "text-rose-800", badge: "bg-rose-100 text-rose-700" }
+    : { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-800", badge: "bg-emerald-100 text-emerald-700" };
 
   return (
     <div className={`relative overflow-hidden rounded-2xl border p-5 shadow-lg h-full transition-all duration-700 ${
@@ -172,7 +180,7 @@ function HistoStage3Card({
       </div>
       {active ? (
         <div className="relative z-10">
-          <p className="text-xs text-slate-600 mb-3 leading-relaxed">Malignancy detected. Upload a histopathology image for further tissue analysis.</p>
+          <p className="text-xs text-slate-600 mb-3 leading-relaxed">Upload a histopathology image for tissue-level analysis.</p>
           {!histoPreview ? (
             <div
               onClick={() => inputRef.current?.click()}
@@ -192,16 +200,42 @@ function HistoStage3Card({
                 <p className="text-[11px] text-slate-600 font-medium truncate">{histoFile?.name}</p>
                 <button onClick={onRemove} className="text-[11px] text-slate-400 hover:text-red-500 ml-2 flex-shrink-0 transition-colors">Remove</button>
               </div>
-              <div className="rounded-lg bg-violet-50 border border-violet-100 px-3 py-2.5 text-center">
-                <p className="text-xs font-semibold text-violet-700">🔬 Histopathology Analysis</p>
-                <p className="text-[10px] text-violet-500 mt-0.5">Deep learning model — coming soon</p>
-              </div>
+
+              {/* Analyse button */}
+              {!histoResult && (
+                <button
+                  onClick={onAnalyze}
+                  disabled={histoLoading}
+                  className="w-full rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-xs font-semibold py-2.5 transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  {histoLoading ? (
+                    <><svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Analysing…</>
+                  ) : (
+                    <>🔬 Analyse Histopathology</>
+                  )}
+                </button>
+              )}
+
+              {/* Result */}
+              {histoResult && (
+                <div className={`rounded-xl border p-3 ${resultTheme.bg} ${resultTheme.border}`}>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className={`text-sm font-bold capitalize ${resultTheme.text}`}>{histoResult.label}</p>
+                    <span className={`text-[10px] font-semibold rounded-full px-2 py-0.5 ${resultTheme.badge}`}>
+                      {(histoResult.confidence * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500">{histoResult.message}</p>
+                  {histoResult.is_mock && <p className="text-[10px] text-amber-600 mt-1 font-medium">⚠ Demo mode — model not loaded</p>}
+                  <button onClick={onRemove} className="mt-2 text-[10px] text-slate-400 hover:text-violet-600 transition-colors">Upload different image</button>
+                </div>
+              )}
             </div>
           )}
           <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFileSelect(f); e.target.value = ""; }} />
         </div>
       ) : (
-        <p className="text-xs text-slate-400 italic relative z-10">Available only when Stage 2 detects malignancy in oral cancer analysis.</p>
+        <p className="text-xs text-slate-400 italic relative z-10">Available only when Stage 1 detects an abnormality in oral cancer analysis.</p>
       )}
     </div>
   );
@@ -219,6 +253,26 @@ export default function DetectPage() {
   const histoInputRef = useRef<HTMLInputElement>(null);
   const [histoFile, setHistoFile] = useState<File | null>(null);
   const [histoPreview, setHistoPreview] = useState<string | null>(null);
+  const [histoLoading, setHistoLoading] = useState(false);
+  const [histoResult, setHistoResult] = useState<{ label: string; confidence: number; is_mock: boolean; message: string } | null>(null);
+
+  const analyzeHisto = async () => {
+    if (!histoFile) return;
+    setHistoLoading(true);
+    const form = new FormData();
+    form.append("file", histoFile);
+    try {
+      const res = await fetch(`${BACKEND_URL}/predict/histopathology`, { method: "POST", body: form });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error((err as { detail?: string }).detail ?? `Server error ${res.status}`);
+      }
+      setHistoResult(await res.json());
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      setError(msg);
+    } finally { setHistoLoading(false); }
+  };
 
   const handleFile = useCallback((f: File) => {
     if (!f.type.startsWith("image/")) { setError("Please upload a valid image file."); return; }
@@ -252,7 +306,7 @@ export default function DetectPage() {
     } finally { setLoading(false); }
   };
 
-  const reset = () => { setFile(null); setPreview(null); setResult(null); setError(null); setHistoFile(null); setHistoPreview(null); };
+  const reset = () => { setFile(null); setPreview(null); setResult(null); setError(null); setHistoFile(null); setHistoPreview(null); setHistoResult(null); };
 
   const cfg = CANCER_TYPES.find((t) => t.id === selectedType);
   const stage1Normal = result && result.stage1_label.toLowerCase().trim() === "normal";
@@ -517,12 +571,16 @@ export default function DetectPage() {
                           histoPreview={histoPreview}
                           onFileSelect={(f) => {
                             setHistoFile(f);
+                            setHistoResult(null);
                             const r = new FileReader();
                             r.onloadend = () => setHistoPreview(r.result as string);
                             r.readAsDataURL(f);
                           }}
-                          onRemove={() => { setHistoFile(null); setHistoPreview(null); }}
+                          onRemove={() => { setHistoFile(null); setHistoPreview(null); setHistoResult(null); }}
                           inputRef={histoInputRef}
+                          onAnalyze={analyzeHisto}
+                          histoLoading={histoLoading}
+                          histoResult={histoResult}
                         />
                       </FadeIn>
                     </>
