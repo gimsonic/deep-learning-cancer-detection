@@ -24,9 +24,8 @@ export default function Footer() {
           </div>
         </div>
         
-        <p className="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed mb-4 text-center">
-          This tool is intended for research and educational purposes only.
-          It is <strong className="font-medium text-slate-700">not a substitute</strong> for professional medical advice, diagnosis, or treatment.
+        <p className="text-sm text-slate-500 w-full leading-relaxed mb-4 text-center">
+          This tool is intended for research and educational purposes only. It is <strong className="font-medium text-slate-700">not a substitute</strong> for professional medical advice, diagnosis, or treatment.
         </p>
         
         <div className="flex items-center justify-center pt-4 border-t border-slate-200/40">

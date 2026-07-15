@@ -5,7 +5,7 @@ const capabilities = [
     icon: Layers,
     title: "Multi-cancer coverage",
     description:
-      "A single platform trained across multiple modalities — brain MRI, chest X-ray, mammography, skin lesions, and histopathology.",
+      "A single platform trained across multiple modalities - mammography, CT scans and lesion images",
   },
   {
     icon: Brain,

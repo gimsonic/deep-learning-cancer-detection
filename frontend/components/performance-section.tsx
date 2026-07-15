@@ -1,6 +1,6 @@
 const stats = [
-  { value: "5+", label: "Cancer types & modalities supported" },
-  { value: "<3s", label: "Average inference time per scan" },
+  { value: "3+", label: "Cancer types & modalities supported" },
+  { value: "<10s", label: "Average inference time per scan" },
   { value: "94%", label: "Validation sensitivity on benchmark sets" },
   { value: "24/7", label: "Consistent, fatigue-free second reads" },
 ]

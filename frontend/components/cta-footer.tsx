@@ -25,15 +25,28 @@ export function CtaFooter() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <ScanLine className="size-4" aria-hidden="true" />
-            </span>
-            <span className="font-semibold tracking-tight">
-              CurieSense<span className="text-primary">AI</span>
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo/lg.png"
+              alt="CurieSense AI Logo"
+              className="h-7 w-auto object-contain"
+            />
+            <div className="flex items-baseline">
+              <span className="text-lg font-bold text-foreground tracking-tight">CurieSense</span>
+              <span
+                className="text-lg font-bold ml-1 tracking-tight"
+                style={{
+                  background: "linear-gradient(to right, #60a5fa, #22d3ee)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                AI
+              </span>
+            </div>
           </Link>
           <p className="text-center text-sm text-muted-foreground">
-            For research and decision-support use only. Not a medical device.
+            For research and decision-support use only.
           </p>
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} CurieSense AI

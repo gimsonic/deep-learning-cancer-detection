@@ -47,7 +47,7 @@ function ConfidenceRing({ pct, color }: { pct: number; color: string }) {
 /* ─── Result card with gauge ─── */
 interface ResultCardProps {
   stage: string; stageNum: number; label: string; confidence: number;
-  theme: { ring: string; badge: string; text: string; bg: string; border: string };
+  theme: { ring: string; badge: string; text: string; bg: string; border: string; shadow?: string };
   icon: "check" | "warning" | "danger"; delay?: number;
 }
 
@@ -63,8 +63,11 @@ function ResultCard({ stage, stageNum, label, confidence, theme, icon, delay = 0
   };
 
   return (
-    <div className={`rounded-2xl border p-5 shadow-sm transition-all duration-700 ${theme.bg} ${theme.border} ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-      <div className="flex items-start justify-between mb-3">
+    <div className={`relative overflow-hidden rounded-2xl border p-5 shadow-lg transition-all duration-700 hover:-translate-y-1 hover:shadow-xl ${theme.bg} ${theme.border} ${theme.shadow || "shadow-slate-200/50"} ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+      {/* Background glow flare */}
+      <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ backgroundColor: theme.ring }} />
+
+      <div className="flex items-start justify-between mb-3 relative z-10">
         <div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
             Stage {stageNum}
@@ -77,13 +80,28 @@ function ResultCard({ stage, stageNum, label, confidence, theme, icon, delay = 0
         </span>
       </div>
 
-      <div className="flex items-center gap-5">
-        <ConfidenceRing pct={pct} color={theme.ring} />
-        <div className="min-w-0">
-          <p className={`text-2xl font-bold leading-tight capitalize ${theme.text}`}>{label}</p>
-          <p className="mt-1 text-sm font-medium text-slate-500">Confidence Score</p>
+      <div className="flex items-center justify-between mt-4 relative z-10">
+        <div className="min-w-0 ml-6">
+          <p className={`text-3xl font-bold leading-tight capitalize tracking-tight ${theme.text}`}>{label}</p>
+          <p className="mt-1.5 text-sm font-medium text-slate-500">
+            Confidence Score <span className="text-slate-400 font-semibold opacity-80 ml-1">- {confidence.toFixed(2)}</span>
+          </p>
+        </div>
+        <div className="flex-shrink-0 pr-4">
+          <ConfidenceRing pct={pct} color={theme.ring} />
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ─── Fade in animation wrapper ─── */
+function FadeIn({ delay = 0, children }: { delay?: number; children: React.ReactNode }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), delay); return () => clearTimeout(t); }, [delay]);
+  return (
+    <div className={`transition-all duration-700 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}>
+      {children}
     </div>
   );
 }
@@ -122,6 +140,73 @@ function AnalysisOverlay() {
   );
 }
 
+/* ─── Histopathology Stage 3 card (Oral Cancer only) ─── */
+function HistoStage3Card({
+  active, histoFile, histoPreview, onFileSelect, onRemove, inputRef,
+}: {
+  active: boolean; histoFile: File | null; histoPreview: string | null;
+  onFileSelect: (f: File) => void; onRemove: () => void;
+  inputRef: { current: HTMLInputElement | null };
+}) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (active) { const t = setTimeout(() => setVisible(true), 600); return () => clearTimeout(t); }
+    else { setVisible(false); }
+  }, [active]);
+
+  return (
+    <div className={`relative overflow-hidden rounded-2xl border p-5 shadow-lg h-full transition-all duration-700 ${
+      active
+        ? `bg-gradient-to-br from-white to-violet-50/40 border-violet-200 shadow-violet-500/10 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`
+        : 'bg-slate-50/60 border-slate-200 opacity-40'
+    }`}>
+      {active && <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full blur-3xl opacity-15 pointer-events-none bg-violet-400" />}
+      <div className="flex items-start justify-between mb-3 relative z-10">
+        <div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-600">Stage 3</span>
+          <p className="mt-1.5 text-xs text-slate-500 font-medium">Histopathology</p>
+        </div>
+        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${active ? 'bg-violet-50 text-violet-700' : 'bg-slate-100 text-slate-400'}`}>
+          {active ? '🔬 Upload' : '🔒 Locked'}
+        </span>
+      </div>
+      {active ? (
+        <div className="relative z-10">
+          <p className="text-xs text-slate-600 mb-3 leading-relaxed">Malignancy detected. Upload a histopathology image for further tissue analysis.</p>
+          {!histoPreview ? (
+            <div
+              onClick={() => inputRef.current?.click()}
+              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-violet-200 bg-violet-50/40 py-6 text-center hover:border-violet-400 hover:bg-violet-50 transition-all duration-200"
+            >
+              <svg className="h-5 w-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+              <p className="text-xs font-medium text-violet-700">Upload histopathology image</p>
+              <p className="text-[10px] text-violet-400">JPEG · PNG · TIFF</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="overflow-hidden rounded-xl border border-violet-200 h-28 flex items-center justify-center bg-white">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={histoPreview} alt="Histopathology" className="max-h-full max-w-full object-contain" />
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] text-slate-600 font-medium truncate">{histoFile?.name}</p>
+                <button onClick={onRemove} className="text-[11px] text-slate-400 hover:text-red-500 ml-2 flex-shrink-0 transition-colors">Remove</button>
+              </div>
+              <div className="rounded-lg bg-violet-50 border border-violet-100 px-3 py-2.5 text-center">
+                <p className="text-xs font-semibold text-violet-700">🔬 Histopathology Analysis</p>
+                <p className="text-[10px] text-violet-500 mt-0.5">Deep learning model — coming soon</p>
+              </div>
+            </div>
+          )}
+          <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFileSelect(f); e.target.value = ""; }} />
+        </div>
+      ) : (
+        <p className="text-xs text-slate-400 italic relative z-10">Available only when Stage 2 detects malignancy in oral cancer analysis.</p>
+      )}
+    </div>
+  );
+}
+
 export default function DetectPage() {
   const [selectedType, setSelectedType] = useState<CancerTypeId | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -131,6 +216,9 @@ export default function DetectPage() {
   const [result, setResult] = useState<PredictionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const histoInputRef = useRef<HTMLInputElement>(null);
+  const [histoFile, setHistoFile] = useState<File | null>(null);
+  const [histoPreview, setHistoPreview] = useState<string | null>(null);
 
   const handleFile = useCallback((f: File) => {
     if (!f.type.startsWith("image/")) { setError("Please upload a valid image file."); return; }
@@ -164,7 +252,7 @@ export default function DetectPage() {
     } finally { setLoading(false); }
   };
 
-  const reset = () => { setFile(null); setPreview(null); setResult(null); setError(null); };
+  const reset = () => { setFile(null); setPreview(null); setResult(null); setError(null); setHistoFile(null); setHistoPreview(null); };
 
   const cfg = CANCER_TYPES.find((t) => t.id === selectedType);
   const stage1Normal = result && result.stage1_label.toLowerCase().trim() === "normal";
@@ -172,12 +260,14 @@ export default function DetectPage() {
   const step = !selectedType ? 0 : !file ? 1 : !result ? 2 : 3;
 
   const resultTheme1 = stage1Normal
-    ? { ring: "#10b981", badge: "bg-emerald-50 text-emerald-700 border border-emerald-200", text: "text-emerald-800", bg: "bg-white", border: "border-slate-200" }
-    : { ring: "#f59e0b", badge: "bg-amber-50 text-amber-700 border border-amber-200", text: "text-amber-800", bg: "bg-white", border: "border-slate-200" };
+    ? { ring: "#10b981", badge: "bg-emerald-50 text-emerald-700 ring-emerald-500/20", text: "text-emerald-800", bg: "bg-gradient-to-br from-white to-emerald-50/40", border: "border-emerald-100", shadow: "shadow-emerald-500/15" }
+    : { ring: "#f59e0b", badge: "bg-amber-50 text-amber-700 ring-amber-500/30", text: "text-amber-800", bg: "bg-gradient-to-br from-white to-amber-50/50", border: "border-amber-200/60", shadow: "shadow-amber-500/20" };
 
   const getTheme2 = (label: string) => label.toLowerCase().includes("benign")
-    ? { ring: "#f59e0b", badge: "bg-amber-50 text-amber-700 border border-amber-200", text: "text-amber-800", bg: "bg-white", border: "border-slate-200" }
-    : { ring: "#f43f5e", badge: "bg-rose-50 text-rose-700 border border-rose-200", text: "text-rose-800", bg: "bg-white", border: "border-slate-200" };
+    ? { ring: "#f59e0b", badge: "bg-amber-50 text-amber-700 ring-amber-500/30", text: "text-amber-800", bg: "bg-gradient-to-br from-white to-amber-50/50", border: "border-amber-200/60", shadow: "shadow-amber-500/20" }
+    : { ring: "#f43f5e", badge: "bg-rose-50 text-rose-700 ring-rose-500/30", text: "text-rose-800", bg: "bg-gradient-to-br from-white to-rose-50/50", border: "border-rose-200/60", shadow: "shadow-rose-500/20" };
+
+  const showStage3 = selectedType === "oral" && result != null && result.stage2_label != null && result.stage2_label.toLowerCase().includes("malign");
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -204,8 +294,8 @@ export default function DetectPage() {
                     onClick={() => { if (type.available) { setSelectedType(type.id as CancerTypeId); reset(); } }}
                     disabled={!type.available}
                     className={`group relative flex flex-col items-center gap-1.5 rounded-xl border p-2 text-center transition-all duration-200 focus:outline-none ${!type.available ? "cursor-not-allowed opacity-40 border-slate-200 bg-slate-50"
-                        : selectedType === type.id ? "border-teal-500 bg-teal-50 ring-1 ring-teal-400/40"
-                          : "border-slate-200 bg-white hover:border-teal-400/60 hover:bg-slate-50 cursor-pointer"
+                      : selectedType === type.id ? "border-teal-500 bg-teal-50 ring-1 ring-teal-400/40"
+                        : "border-slate-200 bg-white hover:border-teal-400/60 hover:bg-slate-50 cursor-pointer"
                       }`}
                   >
                     <div className="w-full h-24 rounded-lg overflow-hidden mix-blend-multiply">
@@ -226,8 +316,7 @@ export default function DetectPage() {
 
 
             {/* Step 2: Upload */}
-            {selectedType && (
-              <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden animate-fadeIn">
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden animate-fadeIn">
                 <div className="flex items-center gap-2.5 border-b border-slate-100 px-5 py-4">
                   <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold text-white transition-colors ${file ? "bg-teal-600" : "bg-slate-400"}`}>2</span>
                   <h2 className="text-sm font-semibold text-slate-900">Upload Scan</h2>
@@ -235,7 +324,7 @@ export default function DetectPage() {
                 <div className="p-4">
                   <p className="mb-3 text-xs text-slate-500 flex items-center gap-1.5">
                     <svg className="h-3.5 w-3.5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {cfg?.imageHint}
+                    {cfg?.imageHint || "Upload an image of the suspected region"}
                   </p>
                   {!preview ? (
                     <div
@@ -283,8 +372,6 @@ export default function DetectPage() {
                   <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }} />
                 </div>
               </div>
-            )}
-
             {/* Analyse button */}
             {file && selectedType && !result && (
               <div className="space-y-3 animate-fadeIn">
@@ -298,24 +385,26 @@ export default function DetectPage() {
                   </svg>
                   Run Analysis
                 </button>
-                <button
-                  onClick={async () => {
-                    if (!file || !selectedType) return;
-                    setLoading(true);
-                    const form = new FormData();
-                    form.append("cancer_type", selectedType);
-                    form.append("file", file);
-                    try {
-                      const res = await fetch(`${BACKEND_URL}/predict/preview`, { method: "POST", body: form });
-                      const data = await res.json();
-                      alert(`Preprocessing:\nOriginal: ${data.original_size}\nCropped: ${data.cropped_size}\nTotal windows: ${data.total_windows}\nRemoved: ${data.removed_count}\nValid patches: ${data.valid_patches}`);
-                      if (data.grid_image) { const w = window.open(); if (w) w.document.write(`<img src="data:image/png;base64,${data.grid_image}" style="max-width:100%"/>`); }
-                    } catch (e) { alert("Preview failed: " + e); } finally { setLoading(false); }
-                  }}
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-50 hover:border-slate-300"
-                >
-                  🔍 Preview Preprocessing (Debug)
-                </button>
+                {selectedType === "breast" && (
+                  <button
+                    onClick={async () => {
+                      if (!file || !selectedType) return;
+                      setLoading(true);
+                      const form = new FormData();
+                      form.append("cancer_type", selectedType);
+                      form.append("file", file);
+                      try {
+                        const res = await fetch(`${BACKEND_URL}/predict/preview`, { method: "POST", body: form });
+                        const data = await res.json();
+                        alert(`Preprocessing:\nOriginal: ${data.original_size}\nCropped: ${data.cropped_size}\nTotal windows: ${data.total_windows}\nRemoved: ${data.removed_count}\nValid patches: ${data.valid_patches}`);
+                        if (data.grid_image) { const w = window.open(); if (w) w.document.write(`<img src="data:image/png;base64,${data.grid_image}" style="max-width:100%"/>`); }
+                      } catch (e) { alert("Preview failed: " + e); } finally { setLoading(false); }
+                    }}
+                    className="w-full rounded-xl border border-slate-200 bg-white py-2.5 text-xs font-medium text-slate-600 transition-all hover:bg-slate-50 hover:border-slate-300"
+                  >
+                    🔍 Preview Preprocessing (Debug)
+                  </button>
+                )}
               </div>
             )}
 
@@ -349,7 +438,7 @@ export default function DetectPage() {
               /* Results */
               <div className="space-y-5 animate-fadeIn">
                 {/* Header bar */}
-                <div className={`flex items-center justify-between rounded-2xl border p-5 ${stage1Normal ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+                <div className="flex items-center justify-between rounded-2xl border border-slate-200 p-5 bg-white shadow-sm">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-0.5">Analysis Complete</p>
                     <h2 className={`text-xl font-bold ${stage1Normal ? "text-emerald-800" : "text-amber-800"}`}>
@@ -372,42 +461,94 @@ export default function DetectPage() {
                   </div>
                 )}
 
-                {/* Stage cards */}
-                <div className="grid gap-4 sm:grid-cols-2">
+                {/* ── Stage pipeline — vertical flow ── */}
+                <div className="flex flex-col gap-0">
+
+                  {/* STAGE 1 */}
                   <ResultCard
                     stage="Screening" stageNum={1} label={result.stage1_label}
                     confidence={result.stage1_confidence}
                     theme={resultTheme1}
                     icon={stage1Normal ? "check" : "warning"} delay={0}
                   />
-                  {result.stage2_label != null && result.stage2_confidence != null && (
-                    <ResultCard
-                      stage="Classification" stageNum={2} label={result.stage2_label}
-                      confidence={result.stage2_confidence}
-                      theme={getTheme2(result.stage2_label)}
-                      icon={result.stage2_label.toLowerCase().includes("benign") ? "warning" : "danger"} delay={400}
-                    />
-                  )}
-                </div>
 
+                  {/* Connector 1 → 2 & STAGE 2 */}
+                  {/* Connector 1 → 2 & STAGE 2 */}
+                  {!stage1Normal && result.stage2_label != null && result.stage2_confidence != null && (
+                    <>
+                      {/* Connector 1 → 2 */}
+                      <FadeIn delay={400}>
+                        <div className="flex flex-col items-center py-2 select-none">
+                          <div className="w-0.5 h-6 transition-colors duration-500 bg-amber-400" />
+                          <svg className="h-3 w-3 -mt-1 transition-colors duration-500 text-amber-400" viewBox="0 0 12 12" fill="currentColor">
+                            <path d="M6 12L0 0h12z" />
+                          </svg>
+                        </div>
+                      </FadeIn>
+                      
+                      {/* STAGE 2 */}
+                      <ResultCard
+                        stage="Classification" stageNum={2} label={result.stage2_label}
+                        confidence={result.stage2_confidence}
+                        theme={getTheme2(result.stage2_label)}
+                        icon={result.stage2_label.toLowerCase().includes("benign") ? "warning" : "danger"} delay={800}
+                      />
+                    </>
+                  )}
+
+                  {/* Oral Cancer: Connector 2 → 3 + Stage 3 */}
+                  {selectedType === "oral" && !stage1Normal && result.stage2_label != null && (
+                    <>
+                      {/* Connector 2 → 3 */}
+                      <FadeIn delay={1200}>
+                        <div className="flex flex-col items-center py-2 select-none">
+                          <div className="w-0.5 h-6 transition-colors duration-500 bg-rose-400" />
+                          <svg className="h-3 w-3 -mt-1 transition-colors duration-500 text-rose-400" viewBox="0 0 12 12" fill="currentColor">
+                            <path d="M6 12L0 0h12z" />
+                          </svg>
+                        </div>
+                      </FadeIn>
+
+                      {/* STAGE 3 — Histopathology */}
+                      <FadeIn delay={1600}>
+                        <HistoStage3Card
+                          active={true}
+                          histoFile={histoFile}
+                          histoPreview={histoPreview}
+                          onFileSelect={(f) => {
+                            setHistoFile(f);
+                            const r = new FileReader();
+                            r.onloadend = () => setHistoPreview(r.result as string);
+                            r.readAsDataURL(f);
+                          }}
+                          onRemove={() => { setHistoFile(null); setHistoPreview(null); }}
+                          inputRef={histoInputRef}
+                        />
+                      </FadeIn>
+                    </>
+                  )}
+
+                </div>
 
                 {/* Heatmap */}
                 {result.annotated_image && (
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
-                      <svg className="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                      <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Suspicion Heatmap</h3>
-                    </div>
-                    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-                      <img src={`data:image/jpeg;base64,${result.annotated_image}`} alt="Heatmap Overlay" className="w-full max-h-[500px] object-contain" />
-                      <div className="absolute top-3 right-3 flex flex-col gap-1.5 rounded-xl bg-white/95 p-3 text-[10px] font-medium text-slate-700 border border-slate-200 shadow-sm backdrop-blur-sm">
-                        <p className="text-[9px] uppercase tracking-wider text-slate-500 font-bold pb-1 border-b border-slate-100 mb-0.5">Suspicion Level</p>
-                        {[["bg-red-600", "Very High"], ["bg-orange-500", "High"], ["bg-yellow-400", "Moderate"], ["bg-green-500", "Low"], ["bg-blue-600", "Normal"]].map(([c, l]) => (
-                          <div key={l} className="flex items-center gap-2"><div className={`w-3 h-3 rounded-sm ${c}`}></div><span>{l}</span></div>
-                        ))}
+                  <FadeIn delay={!stage1Normal ? (selectedType === "oral" ? 2000 : 1200) : 400}>
+                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                      <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-100">
+                        <svg className="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Suspicion Heatmap</h3>
+                      </div>
+                      <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                        <img src={`data:image/jpeg;base64,${result.annotated_image}`} alt="Heatmap Overlay" className="w-full max-h-[500px] object-contain" />
+                        <div className="absolute top-3 right-3 flex flex-col gap-1.5 rounded-xl bg-white/95 p-3 text-[10px] font-medium text-slate-700 border border-slate-200 shadow-sm backdrop-blur-sm">
+                          <p className="text-[9px] uppercase tracking-wider text-slate-500 font-bold pb-1 border-b border-slate-100 mb-0.5">Suspicion Level</p>
+                          {[["bg-red-600", "Very High"], ["bg-orange-500", "High"], ["bg-yellow-400", "Moderate"], ["bg-green-500", "Low"], ["bg-blue-600", "Normal"]].map(([c, l]) => (
+                            <div key={l} className="flex items-center gap-2"><div className={`w-3 h-3 rounded-sm ${c}`}></div><span>{l}</span></div>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </FadeIn>
                 )}
 
                 {/* Disclaimer + reset */}

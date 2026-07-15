@@ -13,7 +13,7 @@ const navItems = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/20 bg-white/30 backdrop-blur-xl backdrop-saturate-150 shadow-[0_4px_30px_rgba(0,0,0,0.03)]">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/30 backdrop-blur-xl backdrop-saturate-150 shadow-sm">
       <div className="mx-auto flex py-4 sm:py-5 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}

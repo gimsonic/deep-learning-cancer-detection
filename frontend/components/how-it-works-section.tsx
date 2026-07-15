@@ -4,21 +4,21 @@ import { Upload, Cpu, ClipboardCheck } from "lucide-react"
 const steps = [
   {
     icon: Upload,
-    step: "01",
+    step: "",
     title: "Upload a scan",
     description:
-      "Drag and drop a medical image — X-ray, MRI, CT slice, mammogram, or pathology tile.",
+      "Drag and drop a medical image -  mammogram, CT slice or pathology tile.",
   },
   {
     icon: Cpu,
-    step: "02",
+    step: "",
     title: "AI analyses",
     description:
       "The deep learning model processes the image and localises abnormal or cancerous regions.",
   },
   {
     icon: ClipboardCheck,
-    step: "03",
+    step: "",
     title: "Review results",
     description:
       "Get a clear prediction, confidence score, and visual overlay to support your decision.",

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-visible">
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:py-24">
         <div className="flex flex-col items-start gap-6">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
@@ -14,7 +14,7 @@ export function HeroSection() {
           </span>
 
           <h1 className="text-balance text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-            Multi-cancer detection from medical scans, in seconds.
+            Multi-cancer detection from medical scans in seconds.
           </h1>
 
           <p className="max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
@@ -41,7 +41,7 @@ export function HeroSection() {
 
         <div className="relative flex justify-center lg:justify-end">
           <div className="absolute -inset-10 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
-          <div className="relative w-full max-w-[550px] flex justify-center items-center lg:-mt-6">
+          <div className="relative w-full max-w-[550px] flex justify-center items-center lg:-mt-25 ">
             <Image
               src="/images/hero-ai.png"
               alt="CurieSense AI abstract medical scanning"
