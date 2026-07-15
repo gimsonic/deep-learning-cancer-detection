@@ -61,11 +61,15 @@ CANCER_CONFIGS: dict = {
     },
     "oral": {
         "stage1": {
-            "path": MODELS_DIR / "", #skin_cancer_model.h5
+            "path": MODELS_DIR / "oral_efficientnetb3_model_1.keras", 
             "threshold": 0.5,
-            "classes": ["normal", "malignant"],
+            "classes": ["abnormal", "normal"],
         },
-        "stage2": None,  # Single-stage: normal vs malignant only
+        "stage2": {
+            "path": MODELS_DIR / "oral_efficientnetb3_model_2.keras", 
+            "threshold": 0.5,
+            "classes": ["benign", "malignant"],
+        },  # Single-stage: normal vs malignant only
         "image_mode": "RGB",      # Oral cavity photos are colour
         "image_size": (224, 224),
     },

@@ -256,11 +256,7 @@ def predict(cancer_type: str, image_array: np.ndarray) -> dict:
         "stage2_label": s2["label"],
         "stage2_confidence": s2["confidence"],
         "is_mock": s1["is_mock"] or s2["is_mock"],
-        "message": (
-            f"Suspicious abnormality detected. "
-            f"Stage 2 result: {s2['label']} "
-            f"({s2['confidence'] * 100:.1f}% confidence)."
-        ),
+        "message": "Suspicious abnormality detected.",
     }
 
 
@@ -542,11 +538,7 @@ def predict_breast_patches(batch_array: np.ndarray) -> dict:
         "stage2_label": s2["label"],
         "stage2_confidence": s2["confidence"],
         "is_mock": s1["is_mock"] or s2["is_mock"],
-        "message": (
-            f"Suspicious abnormality detected. "
-            f"Stage 2 result: {s2['label']} "
-            f"({s2['confidence'] * 100:.1f}% confidence)."
-        ),
+        "message": "Suspicious abnormality detected.",
         "total_patches": s1["total_patches"],
         "positive_patches": s1["positive_patches"],
         "positive_pct": s1["positive_pct"],
