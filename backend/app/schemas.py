@@ -29,4 +29,23 @@ class HistopathologyResponse(BaseModel):
     label: str              # "benign" or "malignant"
     confidence: float
     is_mock: bool = False
-    message: str
+    message: str
+
+
+class SynopsisRequest(BaseModel):
+    """Request schema for AI-generated clinical synopsis."""
+    cancer_type: str
+    stage1_label: str
+    stage1_confidence: float
+    stage2_label: Optional[str] = None
+    stage2_confidence: Optional[float] = None
+    histo_label: Optional[str] = None
+    histo_confidence: Optional[float] = None
+
+
+class SynopsisResponse(BaseModel):
+    """Response schema for clinical synopsis."""
+    synopsis: str           # Markdown-formatted synopsis text
+    risk_level: str         # "Low" | "Moderate" | "High" | "Critical"
+    is_fallback: bool       # True if Gemini API failed and template was used
+

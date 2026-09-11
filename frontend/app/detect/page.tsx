@@ -63,16 +63,15 @@ function ResultCard({ stage, stageNum, label, confidence, theme, icon, delay = 0
   };
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border p-5 shadow-lg transition-all duration-700 hover:-translate-y-1 hover:shadow-xl ${theme.bg} ${theme.border} ${theme.shadow || "shadow-slate-200/50"} ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+    <div className={`relative overflow-hidden rounded-2xl border px-5 py-3.5 shadow-lg transition-all duration-700 hover:-translate-y-1 hover:shadow-xl ${theme.bg} ${theme.border} ${theme.shadow || "shadow-slate-200/50"} ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
       {/* Background glow flare */}
       <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ backgroundColor: theme.ring }} />
 
-      <div className="flex items-start justify-between mb-3 relative z-10">
+      <div className="flex items-start justify-between mb-1.5 relative z-10">
         <div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
-            Stage {stageNum}
+            Stage {stageNum} - {stage}
           </span>
-          <p className="mt-1.5 text-xs text-slate-500 font-medium">{stage}</p>
         </div>
         <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${theme.badge}`}>
           <IconEl />
@@ -80,7 +79,7 @@ function ResultCard({ stage, stageNum, label, confidence, theme, icon, delay = 0
         </span>
       </div>
 
-      <div className="flex items-center justify-between mt-4 relative z-10">
+      <div className="flex items-center justify-between mt-1 relative z-10">
         <div className="min-w-0 ml-6">
           <p className={`text-3xl font-bold leading-tight capitalize tracking-tight ${theme.text}`}>{label}</p>
           <p className="mt-1.5 text-sm font-medium text-slate-500">
@@ -158,7 +157,8 @@ function HistoStage3Card({
     else { setVisible(false); }
   }, [active]);
 
-  const resultTheme = histoResult?.label === "malignant"
+  const isHighRisk = histoResult?.label?.toLowerCase() === "malignant" || histoResult?.label?.toLowerCase() === "cancerous";
+  const resultTheme = isHighRisk
     ? { bg: "bg-rose-50", border: "border-rose-200", text: "text-rose-800", badge: "bg-rose-100 text-rose-700" }
     : { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-800", badge: "bg-emerald-100 text-emerald-700" };
 
@@ -171,8 +171,7 @@ function HistoStage3Card({
       {active && <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full blur-3xl opacity-15 pointer-events-none bg-violet-400" />}
       <div className="flex items-start justify-between mb-3 relative z-10">
         <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-600">Stage 3</span>
-          <p className="mt-1.5 text-xs text-slate-500 font-medium">Histopathology</p>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-600">Stage 3 - Histopathology</span>
         </div>
         <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${active ? 'bg-violet-50 text-violet-700' : 'bg-slate-100 text-slate-400'}`}>
           {active ? '🔬 Upload' : '🔒 Locked'}
@@ -188,7 +187,7 @@ function HistoStage3Card({
             >
               <svg className="h-5 w-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
               <p className="text-xs font-medium text-violet-700">Upload histopathology image</p>
-              <p className="text-[10px] text-violet-400">JPEG · PNG · TIFF</p>
+              <p className="text-[10px] text-violet-400">JPEG · PNG</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -256,6 +255,11 @@ export default function DetectPage() {
   const [histoLoading, setHistoLoading] = useState(false);
   const [histoResult, setHistoResult] = useState<{ label: string; confidence: number; is_mock: boolean; message: string } | null>(null);
 
+  // Synopsis state
+  const [synopsis, setSynopsis] = useState<{ synopsis: string; risk_level: string; is_fallback: boolean } | null>(null);
+  const [synopsisLoading, setSynopsisLoading] = useState(false);
+  const [synopsisOpen, setSynopsisOpen] = useState(false);
+
   const analyzeHisto = async () => {
     if (!histoFile) return;
     setHistoLoading(true);
@@ -306,7 +310,63 @@ export default function DetectPage() {
     } finally { setLoading(false); }
   };
 
-  const reset = () => { setFile(null); setPreview(null); setResult(null); setError(null); setHistoFile(null); setHistoPreview(null); setHistoResult(null); };
+  // Fetch synopsis on demand
+  const generateSynopsis = () => {
+    if (!result || !selectedType) return;
+    setSynopsisOpen(true);
+    if (synopsis || synopsisLoading) return;
+    
+    setSynopsisLoading(true);
+    fetch(`${BACKEND_URL}/predict/synopsis`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cancer_type: selectedType,
+        stage1_label: result.stage1_label,
+        stage1_confidence: result.stage1_confidence,
+        stage2_label: result.stage2_label ?? null,
+        stage2_confidence: result.stage2_confidence ?? null,
+      }),
+    })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setSynopsis(data); })
+      .catch(() => {})
+      .finally(() => setSynopsisLoading(false));
+  };
+
+  const downloadReport = () => {
+    if (!synopsis || !result) return;
+    
+    const content = `CLINICAL SYNOPSIS REPORT
+========================
+Date: ${new Date().toLocaleDateString()}
+Cancer Type: ${CANCER_TYPES.find(t => t.id === selectedType)?.label || 'Unknown'}
+Risk Level: ${synopsis.risk_level}
+
+DIAGNOSIS FINDINGS
+------------------
+${result.stage1_label} (Confidence: ${(result.stage1_confidence * 100).toFixed(1)}%)
+${result.stage2_label ? `Subtype: ${result.stage2_label} (Confidence: ${((result.stage2_confidence || 0) * 100).toFixed(1)}%)` : ''}
+
+
+${synopsis.synopsis.replace(/\*\*/g, '')}
+
+--
+This report is for decision-support use only and is not a replacement for clinical diagnosis.
+    `.trim();
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Clinical_Synopsis_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const reset = () => { setFile(null); setPreview(null); setResult(null); setError(null); setHistoFile(null); setHistoPreview(null); setHistoResult(null); setSynopsis(null); setSynopsisOpen(false); };
 
   const cfg = CANCER_TYPES.find((t) => t.id === selectedType);
   const stage1Normal = result && result.stage1_label.toLowerCase().trim() === "normal";
@@ -609,8 +669,138 @@ export default function DetectPage() {
                   </FadeIn>
                 )}
 
+
+                {/* Clinical Synopsis Card */}
+                {!synopsisOpen && (
+                  <button 
+                    onClick={generateSynopsis}
+                    className="group w-full flex items-center justify-between rounded-2xl border border-indigo-200 bg-indigo-50/50 p-5 transition-all duration-300 shadow-sm hover:shadow-md hover:bg-indigo-50 hover:border-indigo-200 animate-fadeIn"
+                  >
+                    <div className="text-left">
+                      <span className="block text-sm font-bold tracking-wide text-indigo-900 transition-colors">Generate Clinical Synopsis</span>
+                      <span className="block text-[11px] text-indigo-500/80 font-medium mt-0.5">Comprehensive diagnostic breakdown & recommendations</span>
+                    </div>
+                    
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-500 group-hover:bg-indigo-200 group-hover:text-indigo-600 transition-all duration-300 transform group-hover:translate-x-1 shadow-sm">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                    </div>
+                  </button>
+                )}
+
+                {synopsisOpen && synopsisLoading && !synopsis && (
+                  <div className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/50 to-white p-6 shadow-sm relative overflow-hidden animate-fadeIn">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-indigo-300 animate-pulse"></div>
+                    <div className="flex items-center gap-3 mb-4">
+                      <svg className="h-5 w-5 text-indigo-500 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                      <h3 className="text-sm font-bold text-indigo-900">Generating Clinical Synopsis...</h3>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="h-2 bg-indigo-100/50 rounded animate-pulse w-3/4"></div>
+                      <div className="h-2 bg-indigo-100/50 rounded animate-pulse w-full"></div>
+                      <div className="h-2 bg-indigo-100/50 rounded animate-pulse w-5/6"></div>
+                    </div>
+                  </div>
+                )}
+
+                {synopsisOpen && synopsis && (
+                  <FadeIn delay={200}>
+                    <div className="rounded-2xl border border-indigo-100 bg-white shadow-md relative overflow-hidden group">
+                      <div className="absolute top-0 left-0 w-1.5 h-full bg-indigo-300"></div>
+                      
+                      {/* Header */}
+                      <div className="bg-gradient-to-r from-indigo-50/80 to-white px-6 py-4 border-b border-indigo-50 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <h3 className="text-base font-bold text-slate-800">Clinical Synopsis</h3>
+                            <p className="text-[11px] font-medium text-indigo-700">Diagnostic Decision Support</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={downloadReport}
+                            className="flex items-center justify-center h-8 w-8 rounded-full bg-white border border-indigo-100 text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 transition-colors shadow-sm group/btn"
+                            title="Download Report"
+                          >
+                            <svg className="w-4 h-4 group-hover/btn:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-7">
+                        <div className="space-y-1">
+                          {(() => {
+                            let currentSection = "";
+                            return synopsis.synopsis.split("\n").map((line, i) => {
+                              if (line.startsWith("**") && line.endsWith("**")) {
+                                currentSection = line.replace(/\*\*/g, "").toLowerCase();
+                                
+                                let icon = null;
+                                let colorClass = "text-indigo-900 border-indigo-50/50";
+                                const headerText = line.replace(/\*\*/g, "");
+                                
+                                let formattedHeader = <>{headerText}</>;
+                                
+                                if (currentSection.includes("next steps")) {
+                                  icon = <svg className="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>;
+                                } else if (currentSection.includes("lifestyle") || currentSection.includes("preventive")) {
+                                  icon = <svg className="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>;
+                                } else if (currentSection.includes("note") || currentSection.includes("important")) {
+                                  icon = <svg className="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>;
+                                }
+                                
+                                if (currentSection.includes("risk")) {
+                                  icon = <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>;
+                                  const parts = headerText.split(/:\s*/);
+                                  if (parts.length > 1) {
+                                    const riskLevel = parts[1];
+                                    let riskColor = "text-slate-600";
+                                    if (riskLevel.toLowerCase().includes("critical")) riskColor = "text-red-600";
+                                    else if (riskLevel.toLowerCase().includes("high")) riskColor = "text-orange-600";
+                                    else if (riskLevel.toLowerCase().includes("moderate")) riskColor = "text-amber-600";
+                                    else if (riskLevel.toLowerCase().includes("low") || riskLevel.toLowerCase().includes("normal")) riskColor = "text-emerald-600";
+                                    
+                                    formattedHeader = (
+                                      <>
+                                        {parts[0]}: <span className={riskColor}>{parts[1]}</span>
+                                      </>
+                                    );
+                                  }
+                                }
+
+                                return <h4 key={i} className={`text-sm font-bold mt-6 mb-3 pb-1.5 border-b flex items-center gap-2 ${colorClass}`}>
+                                  {icon}
+                                  {formattedHeader}
+                                </h4>;
+                              }
+                              
+                              if (line.startsWith("•") || line.startsWith("- ")) {
+                                const text = line.replace(/^[•\-]\s*/, "");
+                                const bulletIcon = <svg className="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+                                
+                                return (
+                                  <div key={i} className="flex items-start gap-2.5 py-0.5">
+                                    {bulletIcon}
+                                    <p className="text-[13px] text-slate-600 leading-relaxed m-0" dangerouslySetInnerHTML={{ __html: text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }} />
+                                  </div>
+                                );
+                              }
+                              
+                              if (line.trim() === "") return null;
+                              
+                              return <p key={i} className="text-[13px] text-slate-600 leading-relaxed mt-2" dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, "<strong class='font-semibold text-slate-900'>$1</strong>") }} />;
+                            });
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  </FadeIn>
+                )}
+
                 {/* Disclaimer + reset */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 flex items-start gap-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 flex items-start gap-3 mt-4">
                   <svg className="h-4 w-4 text-slate-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   <p className="text-xs text-slate-500 leading-relaxed">
                     This tool is for <strong>research and decision-support use only</strong> — not a replacement for clinical diagnosis. Always consult a qualified medical professional.
@@ -620,7 +810,7 @@ export default function DetectPage() {
                   onClick={() => { reset(); setSelectedType(null); }}
                   className="w-full rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300"
                 >
-                  ← Start a New Analysis
+                  Start a New Analysis
                 </button>
               </div>
             )}

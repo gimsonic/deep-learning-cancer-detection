@@ -37,11 +37,15 @@ CANCER_CONFIGS: dict = {
     },
     "lung": {
         "stage1": {
-            "path": MODELS_DIR / "", #vidmal_lung.h5
+            "path": MODELS_DIR / "vidmal_stage1_normal_abnormal.keras",
             "threshold": 0.5,
-            "classes": ["malignant", "normal"],
+            "classes": ["abnormal", "normal"],
         },
-        "stage2": None,  # Single-stage: benign vs malignant only
+        "stage2": {
+            "path": MODELS_DIR / "vidmal_stage2_benign_malignant.keras",
+            "threshold": 0.5,
+            "classes": ["benign", "malignant"],
+        },
         "image_mode": "RGB",       # Lung model was trained on RGB images
         "image_size": (224, 224),
     },
@@ -74,7 +78,7 @@ CANCER_CONFIGS: dict = {
             # Histopathology model for tissue-level malignancy confirmation
             "path": MODELS_DIR / "oral_histo_oscc_efficientnetb0.keras",
             "threshold": 0.5,
-            "classes": ["benign", "malignant"],
+            "classes": ["Non-Cancerous", "Cancerous"],
         },
         "image_mode": "RGB",      # Oral cavity photos are colour
         "image_size": (224, 224),

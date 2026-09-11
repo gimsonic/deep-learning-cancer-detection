@@ -23,9 +23,15 @@ TF_AVAILABLE = False
 # }
 _registry: dict = {}
 
-# Remove keys like 'quantization_config' due to local environment
-# could not deserialize them
-_COMPAT_STRIP_KEYS = ("quantization_config", "input_axes", "output_axes")
+_COMPAT_STRIP_KEYS = (
+    "quantization_config",
+    "input_axes",
+    "output_axes",
+    "renorm",
+    "renorm_clipping",
+    "renorm_momentum",
+    "synchronized",
+)
 
 # Cleans the model config before Keras loads it
 # (Remove unsupported keys from obj/Dict)
@@ -286,8 +292,8 @@ def predict_histopathology(image_array: np.ndarray) -> dict:
 
     if is_mock:
         message = "Histopathology model not loaded — showing placeholder result."
-    elif label == "malignant":
-        message = f"Histopathology confirms malignancy ({confidence * 100:.1f}% confidence)."
+    elif label.lower() in ["malignant", "cancerous"]:
+        message = f"Histopathology indicates cancerous tissues ({confidence * 100:.1f}% confidence)."
     else:
         message = f"Histopathology indicates benign tissue ({confidence * 100:.1f}% confidence)."
 

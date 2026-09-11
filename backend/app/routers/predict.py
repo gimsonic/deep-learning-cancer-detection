@@ -6,8 +6,9 @@ from app.utils.super_preprocessor import SuperPreprocessor
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from app.config import CANCER_CONFIGS, SUPPORTED_CANCER_TYPES
-from app.schemas import PredictionResponse, HistopathologyResponse
+from app.schemas import PredictionResponse, HistopathologyResponse, SynopsisRequest, SynopsisResponse
 from app.services import inference
+from app.services.synopsis import generate_synopsis
 from app.utils.image_preprocess import preprocess_image
 
 # Create a FastAPI router for prediction endpoints with a common prefix and tags
@@ -255,3 +256,26 @@ async def predict_histopathology(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Histopathology analysis failed: {str(e)}")
+
+
+# ── AI Clinical Synopsis ──
+@router.post("/synopsis", response_model=SynopsisResponse)
+async def get_synopsis(request: SynopsisRequest):
+    """
+    Generate an AI-powered clinical synopsis based on prediction results.
+    Uses Google Gemini API with fallback to template-based generation.
+    """
+    try:
+        result = await generate_synopsis(
+            cancer_type=request.cancer_type,
+            stage1_label=request.stage1_label,
+            stage1_confidence=request.stage1_confidence,
+            stage2_label=request.stage2_label,
+            stage2_confidence=request.stage2_confidence,
+            histo_label=request.histo_label,
+            histo_confidence=request.histo_confidence,
+        )
+        return SynopsisResponse(**result)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Synopsis generation failed: {str(e)}")
