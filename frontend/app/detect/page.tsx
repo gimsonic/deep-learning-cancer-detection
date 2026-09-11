@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect, DragEvent, ChangeEvent } from
 import type { PredictionResponse } from "@/types";
 import Navbar from "@/components/Navbar";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api/backend";
 
 const CANCER_TYPES = [
   { id: "breast", label: "Breast Cancer", description: "Mammogram", imageHint: "Upload a mammogram image", available: true, image: "/images/breast.png", icon: "🫀" },
