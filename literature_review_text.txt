@@ -1,0 +1,108 @@
+Literature Review
+
+Skin Cancer
+Skin cancer is one of the most common cancers in the world, presenting a major public health concern. It can be classified as melanoma, a particularly dangerous type of cancer that accounts for the majority of deaths due to skin cancer, and non-melanoma skin cancers like basal cell carcinoma (BCC) and squamous cell carcinoma (SCC). The key to the survival of the patient lies in early diagnosis. If caught early, the five-year survival rate of melanoma is over 99%; however, this greatly decreases if the cancer has metastasized prior to diagnosis.The traditional method used to detect skin cancer through clinical practice is predominantly based on the physical examination carried out by a dermatologist, who may use the aid of dermoscopy if necessary. In the event that the lesion looks suspicious, a physical biopsy is conducted. Although this approach works quite well, it has some inherent shortcomings within the entire system. First, it is very subjective, as it depends entirely on the expertise of each particular dermatologist.
+
+Primary Goals of the references can explain like this.To detect and classify 9 different forms of skin cancer [1]. To detect and classify skin cancer into 8 different classes [2]. To present a systematic review of classical deep learning approaches for skin cancer detection [3].Dataset Sources are like this, 2357 images from the International Skin Imaging Collaboration (ISIC) dataset [1]. ISIC 2019 challenge dataset compressed to 800 images [2]. N/A (Evaluated 51 existing research papers and various datasets like HAM10000, PH2, and ISIC) [3].For Data Pre-processing those techniques are used by the previous researches. Includes hair removal, noise removal, and contrast enhancement. Utilizes data augmentation techniques like shear, zoom in, reflection, and rotation [1]. Includes the Dull Razor method for hair removal, grayscale conversion, Gaussian filter for smoothing, and Median filter for noise removal [2]. N/A (Instead used defined search strings and inclusion/exclusion criteria to filter literature) [3].For Segmentation Techniques, Image segmentation to break up the region of interest and delineate borders [1]. Color-based k-means clustering [2]. Feature Extraction happened in previous researches like this, Based on the ABCD rule (Asymmetry, Diameters, Compactness, Borders, Blue white). Uses a co-occurrence matrix to identify properties like energy, entropy, autocorrelation, and contrast [1]. Extracts features using the ABCD method and Gray Level Co-occurrence Matrix (GLCM) method [2]. N/A (Extracted data by reviewing methodologies and results of selected papers) [3]. Classification Models can describe like below, Convolutional Neural Network (CNN) specifically utilizing the ResNet50 architecture [1]. Multi-class Support Vector Machine (MSVM) [2]. N/A (Analyzed papers using Artificial Neural Networks, Convolutional Neural Networks, Kohonen self-organizing neural networks, and Generative adversarial neural networks) [3]. Achieved an accuracy of 91.32% across 9 classes [1]. Achieved an accuracy of 96.25% across 8 classes [2]. Concluded CNN gives better results than other types of neural networks for image data classification [3].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     2.Oral Cancer
+             
+**
+
+Large-Scale Systematic Reviews with Rigorous Assessment:
+(K. Warin & S. Suebnukarn, 2024) employed the most comprehensive approach, systematically reviewing 54 qualified studies using PRISMA guidelines across three major databases (Medline, Google Scholar, Scopus) from 2000-2023. Their methodology included QUADAS-2 risk assessment, revealing 13 studies with low bias across all domains. Results showed exceptional performance: classification accuracy 85.0–100%, F1-scores 79.31–89.0%, Dice coefficient 76.0–96.3%, and Concordance index 0.78–0.95, with pooled diagnostic odds ratios of 2549.08 (95% CI 410.77–4687.39).
+
+(Tapabrat Thakuria et al., 2024) focused specifically on handheld AI tools, searching PubMed, Scopus, Google Scholar, and Web of Science with PROSPERO registration. Their analysis of 25 papers using bubble and bar charts identified DenseNet121, VGG19, and EfficientNet-B0 as superior for binary classification, while EfficientNet-B4, Inception-V4, and Faster R-CNN excelled in multiclass tasks, achieving up to 100% precision, 99% specificity, and 97.5% accuracy.
+
+Architecture-Specific Deep Learning Studies:
+(R. O. Alabi et al., 2021) conducted targeted analysis of CNN-based prognostication across 34 studies using five databases (PubMed, Scopus, OvidMedline, Web of Science, IEEE). Their methodology distinguished between imaging modalities: spectra data achieved superior performance (average specificity 0.97, sensitivity 0.99, AUC 0.96, accuracy 96.6%) compared to CT images (specificity 0.84, sensitivity 0.81, AUC 0.967, accuracy 81.8%).
+
+(C. Chu et al., 2021) employed comparative analysis between pathological and radiographic images for oral SCC diagnosis, prognosis, and metastasis detection. Results demonstrated pathological images' superiority (77.89–97.51% accuracy) over radiographic approaches (76–94.2% accuracy), with models successfully classifying cell types and predicting survival outcomes.
+
+Multi-Modal and Hybrid Methodologies:
+(Pankaj S. Shinde et al., 2025) presented the most technically diverse approach, analyzing CNNs, RNNs, autoencoders, extreme learning machines, Transformer models, and GANs across multiple imaging modalities including histopathology, hyperspectral imaging, autofluorescence, spectroscopy, and photography. However, specific performance metrics were not detailed in the abstract.
+
+(Chen-xi Li et al., 2024) conducted meta-analysis of deep learning radiomics using ROBINS-I quality evaluation across 26 studies involving 64,731 medical images from 2012-2023. Their random-effects model yielded pooled sensitivity 0.88 (95%CI: 0.87∼0.88) and specificity 0.80 (95%CI: 0.80∼0.81), though Deeks' asymmetry test revealed slight publication bias (P = 0.03).
+
+Specialized Technical Approaches:
+(H. Mahmood et al., 2020) focused on whole slide image analysis for head and neck lesions, reviewing 11 studies with uni-centric datasets (40-270 images) using heuristics, supervised and unsupervised learning with over 10 classification techniques, achieving 79-100% accuracy despite high bias risk.
+
+(R. O. Alabi et al., 2021a) examined 41 studies emphasizing support vector machines and artificial neural networks, reporting broad performance ranges: specificity 0.57-1.00, sensitivity 0.70-1.00, and accuracy 63.4-100.0%, highlighting significant methodological variability.
+
+Emerging Technical Integration:
+(M. Faisal et al., 2025) incorporated bio-inspired optimization techniques (PSOBER, Improved Whale Optimization Algorithm) alongside advanced models like CANet, InceptionResNetV2, EfficientNet, demonstrating the evolution toward hybrid AI approaches, though specific performance metrics weren't provided in the abstract.
+
+
+
+
+References
+1. Alabi, R.O., Bello, I., Youssef, O., Elmusrati, M., Mäkitie, A. and Almangush, A. (2021) 'Utilizing Deep Machine Learning for Prognostication of Oral Squamous Cell Carcinoma—A Systematic Review', *Frontiers in Oral Health*, 2.
+
+2. Alabi, R.O., Youssef, O., Pirinen, M., Elmusrati, M., Mäkitie, A., Leivo, I. and Almangush, A. (2021) 'Machine learning in oral squamous cell carcinoma: Current status, clinical concerns and prospects for future - A systematic review', *Artificial Intelligence in Medicine*, 115.
+
+3. Chu, C., Lee, N., Ho, J., Choi, S.W. and Thomson, P. (2021) 'Deep Learning for Clinical Image Analyses in Oral Squamous Cell Carcinoma: A Review', *JAMA Otolaryngology - Head and Neck Surgery*, 147(10), pp. 893-900.
+
+4. Dixit, S., Kumar, A. and Srinivasan, K. (2023) 'A Current Review of Machine Learning and Deep Learning Models in Oral Cancer Diagnosis: Recent Technologies, Open Challenges, and Future Research Directions', *Diagnostics*, 13(21).
+
+5. Faisal, M., Gupta, R. and Ahmad, J.S. (2025) 'Comprehensive Analysis of Novel and Distinctive Approaches Used to Identify the Oral Cancer in Early Stages', in *2025 IEEE DELCON - International Conference on Recent Smart Technologies in Engineering for Sustainable Development*.
+
+6. Li, C., Chen, X., Chen, C., Gong, Z., Pataer, P., Liu, X. and Lv, X. (2024) 'Application of deep learning radiomics in oral squamous cell carcinoma-Extracting more information from medical images using advanced feature analysis', *Journal of Stomatology Oral and Maxillofacial Surgery*, 125(3).
+
+7. Mahmood, H., Shaban, M., Indave, B.I., Santos-Silva, A., Rajpoot, N. and Khurram, S. (2020) 'Use of artificial intelligence in diagnosis of head and neck precancerous and cancerous lesions: A systematic review', *Oral Oncology*, 110.
+
+8. R.T. (2025) 'Oral Cancer Detection Using Deep Learning', *International Journal for Research in Applied Science and Engineering Technology*, 13(1).
+
+9. Sharma, G. and Chadha, R. (2022) 'Skin Cancer and Oral Cancer Detection using Deep Learning Technique', in *2022 IEEE International Conference on Distributed Computing and Electrical Circuits and Electronics (ICDCECE)*.
+
+10. Shinde, P.S., Pandey, S.K. and Ojha, M. (2025) 'A Review on Detection of non-invasive Oral Cancer based on Deep Learning Techniques, Challenges and Future Directions', in *2025 2nd International Conference on Artificial Intelligence for Innovations in Healthcare Industries (ICAIIHI)*.
+
+11. Thakuria, T., Rahman, T., Mahanta, D.R., Khataniar, S.K., Goswami, R.D., Rahman, T. and Mahanta, L. (2024) 'Deep learning for early diagnosis of oral cancer via smartphone and DSLR image analysis: a systematic review', *Expert Review of Medical Devices*, 21(8), pp. 645-658.
+
+12. Warin, K. and Suebnukarn, S. (2024) 'Deep learning in oral cancer- a systematic review', *BMC Oral Health*, 24(1).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+References
+
+[1] C.Kavithaa, S.Priyankab, M.Praveen Kumarc, V.Kusumad In 2024 International Conference on Machine Learning and Data Engineering (ICMLDE 2023)
+
+[2] M. Krishna Monikaa, N. Arun Vignesha, Ch. Usha Kumaria, M.N.V.S.S. Kumarb, E. Laxmi Lydia In 2020 Gokaraju Rangaraju Institute of Engineering and Technology, Hyderabad, India Aditya Institute of Technology and Management, Srikakulam, Andhra Pradesh, India  Vignan’s Institute of Information Technology, Visakhapatnam, Andhra Pradesh, India
+
+[3] Mehwish Dildar , Shumaila Akram , Muhammad Irfan , Hikmat Ullah Khan, Abdur RehmanMahmood,SolimanAyedAlsaiari , Abdul Hakeem M Saeed , Mohammed Olaythah Alraddadi and Mater Hussen Mahnashi , MuhammadRamzan In 2021 International Journal of Environmental Research and Public Health

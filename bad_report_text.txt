@@ -1,0 +1,805 @@
+
+
+AI-Based Multi-Cancer Detection System
+Using Deep Learning
+
+CSCI 23072- Group Project (2023/2024)
+Project Report
+
+Project Supervisor : Dr. Mohamad Ishan Sabar
+Co-Supervisor : Ms. R.M.S.L. Rathnayake
+Group No. : 11
+Group members :
+
+
+FACULTY OF COMPUTING AND TECHNOLOGY
+UNIVERSITY OF KELANIYA
+B.Sc. (Honours) in Computer Science Degree
+
+
+Project Report – Group 11
+
+ABSTRACT
+
+Cancer remains one of the leading causes of death worldwide, and early detection plays a critical role in improving patient survival rates and treatment outcomes. However, conventional cancer diagnosis often relies on manual interpretation of medical images by specialists, which can be time-consuming, costly, and subject to human error. These challenges are particularly significant in regions where access to expert healthcare professionals is limited. To address this issue, this project proposes the development of an AI-Based Multi-Cancer Detection System using deep learning techniques.
+The proposed system focuses on the detection of four common cancer types: breast cancer, skin cancer, oral cancer and lung cancer. Medical image datasets are collected from reliable open-source repositories and preprocessed using techniques such as resizing, normalization, augmentation, and noise reduction to improve data quality and model performance. Convolutional Neural Networks (CNNs) combined with transfer learning approaches are employed to develop accurate and efficient classification models. Pre-trained architectures such as MobileNet and ResNet are utilized to reduce training time while maintaining high detection accuracy.
+The trained models are evaluated using standard performance metrics including accuracy, precision, recall, sensitivity, specificity, and Area Under the Curve (AUC). To improve interpretability and user trust, visualization techniques such as Gradient-weighted Class Activation Mapping (Grad-CAM) are incorporated to highlight image regions influencing model predictions. Furthermore, a lightweight web-based prototype is developed, allowing users to upload medical images and receive AI-generated diagnostic predictions through an intuitive interface.
+The expected outcome of this project is a reliable, scalable, and accessible cancer detection framework that supports early diagnosis and assists healthcare professionals in decision-making. This system also provides a foundation for future expansion to additional cancer types and broader integration of artificial intelligence technologies within the healthcare sector.
+
+Project Report – Group 11
+
+ACKNOWLEDGEMENT
+
+We would like to express our sincere gratitude to our project supervisor, Dr. Mohamad Ishan Sabar, for his valuable guidance, continuous support, and constructive feedback throughout the development of this project. His expertise and encouragement greatly contributed to the successful completion of this work.
+We also extend our heartfelt thanks to our co-supervisor, Ms. R.M.S.L. Rathnayake, for her assistance, suggestions, and support during various stages of the project.
+Appreciation is also expressed to the faculty members of the Faculty of Computing & Technology, particularly Dr. Navodi Mekhala Hakmanage, for their insightful comments and encouragement, which contributed to broadening the research from various perspectives.
+Finally, we would like to thank all group members W.A.G. Menaka, J.V. Senanayake, D.T.Kularathne, G.M.S.M. Gallaba and H.P.C. Kanishka for their dedication, cooperation, and commitment throughout the project. Their teamwork and collective effort played a significant role in the successful completion of this research.
+
+
+
+
+
+
+
+
+
+Project Report – Group 11
+
+TABLE OF CONTENTS
+Introduction 
+Motivation for the Project                                                                                                6
+Project Objectives                                                                                                            6
+Scope of the Project                                                                                                         7
+Limitations                                                                                                                       9
+
+
+Background 
+Problem Identification                                                                                                    10
+Literature Review                                                                                                           10
+Methods and Tools                                                                                                          11
+
+
+Design 
+Overall Design                                                                                                                15
+Selected sections to be implemented
+Detailed design of the implemented section
+
+
+Implementation 
+Technologies used
+User Interface Design
+Reports Generated
+
+
+Discussion and Conclusion
+Discussion on the process followed during the project
+Conclusions drawn
+
+
+Future Work 
+References 
+Appendices 
+Project Report – Group 11
+
+LIST OF FIGURES / Tables
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Project Report – Group 11
+
+LIST OF ABBREVIATIONS
+
+
+
+
+
+
+
+Project Report – Group 11
+
+Introduction
+
+Motivation for the project
+
+Cancer is a problem that causes a lot of deaths around the world. Finding cancer early is very important for helping people survive.. The old ways of diagnosing cancer usually need experts to look at medical pictures, which takes a lot of time. Not everyone can get to these experts in some areas. If it takes long to diagnose cancer the treatment might not work as well and it can cause more problems for peoples health.
+
+There have been some improvements in Artificial Intelligence and Deep Learning lately. These improvements have shown that Artificial Intelligence can be very good at looking at pictures. So this project is trying to make a system that uses Artificial Intelligence to detect types of cancer like breast cancer, skin cancer oral cancer and lung cancer from medical images. The system should help doctors and other healthcare professionals by giving them more accurate help, with diagnosing cancer. This project also wants to help Artificial Intelligence get better at being used in healthcare.
+
+Project Objectives
+Collect Cancer Image Datasets - To collect annotated medical image datasets from reliable open-source repositories and other available sources for training and evaluating the cancer detection models.
+Preprocess and Prepare the Collected Datasets - To preprocess the collected datasets using resizing, normalization, augmentation, and format conversion to improve data quality for model training.
+Design and Train Models for Each Cancer Type - To design and train CNN-based models for each cancer type using TensorFlow and PyTorch with transfer learning to improve performance.
+Project Report – Group 11
+Validate the Trained Models - To evaluate the trained models using separate validation datasets and measure performance in terms of accuracy, sensitivity, and specificity.
+Develop a Prototype Interface - To develop a web-based prototype that allows users to upload medical images and get AI-based predictions.
+Evaluate System Performance - To assess the system’s performance in terms of accuracy, response time, and usability.
+
+Scope of the Project
+The main scope of this project is to develop an AI-Based Multi-Cancer Detection System that can assist in the early detection of cancer using medical images. The system focuses on breast cancer, skin cancer, and lung cancer detection by applying deep learning techniques. A web-based platform will be developed to allow users to upload medical images and receive AI-generated predictions. The project aims to provide a reliable and accessible tool that can support healthcare professionals in the diagnostic process.
+
+The primary aspects within the scope of the project are as follows:
+
+Medical Image Dataset Collection
+Collect medical image datasets for breast cancer, skin cancer, oral cancer and lung cancer from reliable open-source repositories. The collected datasets will be used for model training, validation, and testing.
+
+Data Preprocessing
+Perform preprocessing operations such as resizing, normalization, augmentation, and format conversion to improve data quality and prepare the datasets for deep learning model development.
+
+Project Report – Group 11
+
+Deep Learning Model Development
+Design and develop Convolutional Neural Network (CNN) models using deep learning frameworks such as TensorFlow and PyTorch. Transfer learning techniques will be applied to improve model performance and training efficiency.
+
+Model Evaluation
+Evaluate the developed models using performance metrics such as accuracy, precision, recall, sensitivity, specificity, and AUC to assess their effectiveness in cancer detection.
+
+Visualization and Interpretability
+Implement visualization techniques such as Grad-CAM to highlight the image regions that influence model predictions, improving the interpretability of the system.
+
+Web-Based Application Development
+Develop a user-friendly web interface that allows users to upload medical images and receive cancer detection predictions generated by the trained models.
+
+Testing and Validation
+Conduct functional testing and performance validation using unseen datasets to ensure the reliability and effectiveness of the proposed system.
+
+Deployment
+Deploy the application on a cloud-based environment, enabling users to access the system through a web browser and allowing future scalability and integration with other platforms.
+
+
+
+
+
+
+
+Project Report – Group 11
+
+Limitations
+Although the proposed AI-Based Multi-Cancer Detection System aims to provide accurate and efficient cancer detection, several limitations exist due to resource constraints, data availability, and project scope. The following limitations apply to the current implementation of the system.
+
+Limited Cancer Types
+The system focuses only on breast cancer, skin cancer, oral cancer and lung cancer. Other cancer types are not included within the scope of this project.
+
+Image-Based Detection Only
+The system performs analysis solely based on medical images. Other clinical information such as patient history, laboratory reports, and genetic factors are not considered.
+
+Not a Replacement for Medical Experts
+The system is designed to provide diagnostic support and should not be considered a substitute for professional medical diagnosis or clinical decision-making.
+
+Limited Validation Data
+Model evaluation is performed using available validation and test datasets. Real-world clinical validation with large-scale patient data is beyond the scope of this project.
+
+Internet Dependency
+Since the system is deployed as a web-based application, users require an internet connection to access its functionality.
+
+Computational Resource Constraints
+Training deep learning models requires significant computational resources. The performance of the system may be limited by the available hardware and cloud computing resources used during development.
+
+Project Report – Group 11
+
+Background
+
+Problem Identification
+Cancer is a major health challenge worldwide, and early detection is critical for effective treatment. However, traditional cancer diagnosis relies heavily on the manual analysis of medical images by specialists, which can be time-consuming and prone to human error. In addition, limited access to expert healthcare services can delay diagnosis, particularly in underserved areas. Therefore, there is a need for an automated and reliable system that can assist in the early detection of breast, skin, oral and lung cancers using medical image analysis.
+
+Literature Review
+
+
+
+
+
+
+
+
+
+
+Project Report – Group 11
+
+Methods and Tools
+Our project focuses on deep learning techniques, medical image processing, and web technologies to develop an AI-Based Multi-Cancer Detection System. The system is designed to detect breast cancer, skin cancer, and lung cancer from medical images and provide predictions through a user-friendly web interface. The methods and tools used throughout this project are described below.
+
+Data Collection and Preprocessing
+Medical Image Datasets
+Medical image datasets are collected from reliable open-source repositories such as Kaggle, ISIC, and NIH.
+These datasets provide labelled images required for training and evaluating the cancer detection models.
+Data Preprocessing Techniques
+Preprocessing is performed to improve data quality and ensure consistency among images.
+Techniques such as resizing, normalization, augmentation, and format conversion are applied before model training.
+ Deep Learning and Model Development
+Convolutional Neural Networks (CNNs)
+
+CNNs are used as the primary deep learning technique for extracting features and classifying medical images.
+They enable the system to identify patterns associated with different cancer types.
+
+Project Report – Group 11
+
+Transfer Learning
+
+Transfer learning is used to improve model performance and reduce training time.
+Pre-trained models can be adapted to the cancer detection task with fewer computational resources.
+
+TensorFlow and Keras
+
+TensorFlow and Keras are used for designing, training, and evaluating deep learning models.
+These frameworks provide efficient tools for implementing CNN architectures.
+
+PyTorch
+
+PyTorch is used for experimentation, model development, and performance comparison.
+It provides flexibility for implementing advanced deep learning techniques.
+
+Model Evaluation and Visualization
+
+Performance Evaluation
+
+The trained models are evaluated using metrics such as accuracy, precision, recall, sensitivity, specificity, and AUC.
+These metrics help assess the effectiveness of the proposed system.
+
+
+
+Project Report – Group 11
+
+Grad-CAM Visualization
+
+Grad-CAM is used to highlight the regions of medical images that contribute most to the model's predictions.
+This improves model interpretability and helps users understand the prediction process.
+
+Web Application Development
+
+Frontend Technologies
+
+HTML, CSS, and JavaScript are used to develop the user interface.
+The interface allows users to upload medical images and view prediction results.
+
+Backend Technologies
+
+Python-based frameworks are used to integrate the trained deep learning models with the web application.
+The backend processes uploaded images and returns prediction results to users.
+
+Development Tools
+
+Google Colab
+
+Google Colab provides GPU resources for training deep learning models efficiently.
+
+
+
+Project Report – Group 11
+
+Git and GitHub
+
+Git and GitHub are used for version control, code management, and team collaboration throughout the project.
+
+Visual Studio Code
+
+Visual Studio Code is used as the primary development environment for coding, debugging, and project management.
+
+Testing and Validation
+
+Model Testing
+
+The developed models are tested using unseen datasets to evaluate their performance and generalization ability.
+
+System Validation
+
+Functional testing is conducted to ensure that the web application operates correctly and provides reliable prediction results.
+
+
+
+
+
+
+
+Project Report – Group 11
+
+Design
+This part of the book is, about the design of the proposed AI-Based Multi-Cancer Detection System. The AI-Based Multi-Cancer Detection System is made to find breast cancer, skin cancer oral cancer and lung cancer from pictures using deep learning techniques. The AI-Based Multi-Cancer Detection System design process has a parts. These parts include the system architecture, the module design, the technology stack and the hardware and software requirements that the AI-Based Multi-Cancer Detection System needs to be developed and used.
+Overall System Design
+The proposed system follows a modular architecture that integrates medical image processing, deep learning models, and a web-based user interface. Users can upload medical images through the web application, and the system processes the images before passing them to the trained deep learning models. The prediction results are then generated and displayed to the user.
+
+The major components of the system are ;
+
+User Interface Module : Provides a web-based platform for users to upload medical images and view prediction results.
+Image Preprocessing Module : Performs image resizing, normalization, and augmentation to prepare images for analysis.
+Cancer Detection Module : Uses trained CNN-based models to classify medical images and detect cancer.
+Prediction and Visualization Module : Generates prediction results and visual explanations using Grad-CAM.
+Data Storage Module : Stores uploaded image information and prediction records when required.
+
+
+Project Report – Group 11
+
+Selected sections to be implemented (with justification)
+
+User Interface Module
+
+Medical Image Upload
+  Users can upload breast, skin, oral or lung medical images through a simple web interface.
+
+Prediction Results
+The system displays the predicted cancer type along with the confidence score.
+
+User-Friendly Interface
+The interface is designed to be simple and easy to use for healthcare professionals, students, and general users.
+
+The user interface is an essential component of the system because it provides an easy and efficient way for users to interact with the application. A simple interface improves usability and allows users to obtain prediction results without requiring technical knowledge.
+
+Medical Image Preprocessing Module
+
+Image Resizing
+Resize uploaded images to the required input size of the deep learning model.
+
+Image Normalization
+Normalize pixel values to improve model performance.
+
+Data Augmentation
+Apply image transformations such as rotation, flipping, and zooming during model training to improve generalization.
+
+Project Report – Group 11
+
+The preprocessing module is implemented to ensure that all medical images have a consistent format before being passed to the deep learning models. Proper preprocessing improves prediction accuracy and increases the robustness of the trained models.
+
+Deep Learning Model Module
+
+CNN-Based Cancer Detection
+Develop CNN models for breast cancer, skin cancer, oral and lung cancer classification.
+
+Transfer Learning
+Utilize pre-trained models to improve prediction accuracy and reduce training time.
+
+Model Optimization
+Fine-tune model parameters to obtain better performance.
+
+Deep learning is the core component of the proposed system. CNNs are highly effective for medical image classification because they automatically learn important image features and achieve high accuracy in image-based cancer detection.
+
+Prediction Module
+
+Image Classification
+Classify uploaded images into the appropriate cancer category.
+
+Confidence Score Generation
+Display the confidence level of each prediction.
+
+Prediction Response
+Generate prediction results within a short response time.
+
+
+Project Report – Group 11
+
+The prediction module provides users with fast and reliable cancer detection results. Confidence scores help users understand the reliability of each prediction and improve the overall usefulness of the system.
+
+Visualization Module
+
+Grad-CAM Heatmaps
+Highlight the regions of the medical image that influence the model's prediction.
+
+Prediction Explanation
+Provide visual explanations to improve model interpretability.
+
+Medical AI systems should not only provide predictions but also explain how the prediction was made. Grad-CAM improves transparency by identifying the image regions that contribute most to the model's decision.
+
+Web Application Module
+
+Image Upload Interface
+Allow users to upload medical images using a web browser.
+
+Result Display
+Display prediction results together with confidence scores and visual explanations.
+
+Responsive Design
+Ensure the application can be accessed from different devices.
+
+A web-based application increases accessibility because users can access the system through a browser without installing additional software. This makes the proposed system more convenient and easier to use.
+Project Report – Group 11
+
+Model Evaluation Module
+
+Accuracy Evaluation
+Measure the overall prediction accuracy of the models.
+
+Performance Metrics
+Calculate Precision, Recall, F1-Score, Sensitivity, Specificity, and AUC.
+
+Testing
+Evaluate the trained models using unseen test datasets.
+
+Model evaluation is necessary to verify the reliability and effectiveness of the developed models. Performance metrics provide quantitative evidence of how well the system performs in cancer detection.
+
+Backend Processing Module
+
+Image Processing
+Receive uploaded medical images and prepare them for prediction.
+
+Model Inference
+Load trained models and generate predictions.
+
+Response Generation
+Return prediction results to the web application.
+
+The backend module connects the user interface with the deep learning models. It manages image processing, model inference, and communication between all system components, ensuring efficient and reliable operation.
+
+
+
+
+Project Report – Group 11
+
+Detailed design of the implemented section
+
+User Interface Module
+
+The User Interface (UI) provides a simple and user-friendly platform that enables users to interact with the system. Users can upload breast, skin, oral or lung medical images and receive AI-generated prediction results. The interface also displays the confidence score and visualization generated by the deep learning model.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Figure 3.1 – User Interface Mock-up
+
+
+
+
+
+Project Report – Group 11
+
+Image Preprocessing Module
+
+Before prediction, uploaded medical images are preprocessed to improve their quality and maintain consistency. The preprocessing pipeline includes image resizing, normalization, and augmentation. These operations ensure that all images are compatible with the trained CNN models and improve prediction accuracy.
+
+
+
+
+
+
+                                                    Figure 3.2 – Image Preprocessing Workflow
+
+
+
+
+Project Report – Group 11
+
+Deep Learning Model Module
+
+The Deep Learning Module performs cancer detection using Convolutional Neural Networks (CNNs) with transfer learning. Separate models are trained for breast cancer, skin cancer, oral cancer and lung cancer datasets. The trained model extracts important image features and classifies the uploaded image.
+
+
+
+
+                                                        Figure 3.3 – CNN Model Architecture
+
+
+
+
+
+
+
+
+Project Report – Group 11
+
+Prediction Module
+
+The prediction module receives the processed image from the preprocessing module and performs inference using the trained deep learning model. The system predicts whether the uploaded image belongs to a particular cancer class and calculates the prediction confidence.
+
+
+
+
+
+
+                                                           Figure 3.4 – Prediction Workflow
+
+
+
+
+
+
+
+
+
+
+Project Report – Group 11
+
+Visualization Module
+
+To improve interpretability, the system generates Grad-CAM visualizations that highlight the regions of the medical image influencing the model's prediction. This enables users to better understand the AI decision-making process.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                            Figure 3.5 – Grad-CAM Visualization Process
+
+
+
+Project Report – Group 11
+
+Web Application Module
+
+The web application integrates the frontend and backend components of the system. It allows users to upload images, communicate with the backend server, and display the generated prediction results through an interactive interface.
+
+
+
+
+
+
+                                                          Figure 3.6 – Web Application Architecture
+
+
+
+Project Report – Group 11
+
+Overall System Interaction
+
+The complete workflow begins when the user uploads a medical image through the web application. The image is preprocessed and passed to the trained CNN model for prediction. The prediction results, confidence score, and Grad-CAM visualization are then displayed to the user through the web interface.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                       Figure 3.8 – Overall System Architecture
+
+
+Project Report – Group 11
+
+Implementation
+The implementation focuses on integrating deep learning models with a web-based application to provide an efficient and user-friendly platform for detecting breast cancer, skin cancer, oral cancer and lung cancer from medical images. The system consists of image preprocessing, deep learning-based classification, prediction visualization, and a web interface that allows users to upload medical images and receive AI-generated predictions.
+
+Technologies Used
+Python
+Python is used as the primary programming language because of its simplicity and extensive support for artificial intelligence, machine learning, and image processing.
+
+TensorFlow and Keras
+TensorFlow and Keras are used to design, train, and evaluate Convolutional Neural Network (CNN) models. These frameworks provide optimized tools for implementing deep learning algorithms and transfer learning techniques.
+
+PyTorch
+PyTorch is used for model experimentation and performance comparison. It provides flexibility for implementing and testing different deep learning architectures.
+
+OpenCV
+OpenCV is used for image processing operations such as resizing, normalization, and image enhancement before prediction.
+
+NumPy
+NumPy is used for numerical computations, multidimensional array operations, and efficient processing of image data.
+
+Project Report – Group 11
+
+Grad-CAM
+Grad-CAM is implemented to generate visual explanations by highlighting the regions of medical images that influence the model's prediction.
+
+HTML, CSS, and JavaScript
+These technologies are used to develop the frontend of the web application, providing an interactive interface for image uploading and displaying prediction results.
+
+Visual Studio Code
+Visual Studio Code is used as the primary integrated development environment (IDE) for application development and debugging.
+
+Google Colab
+Google Colab provides cloud-based GPU resources for training the deep learning models efficiently.
+
+Git and GitHub
+Git and GitHub are used for source code management, version control, and collaboration among team members.
+
+
+
+
+
+
+
+
+
+Project Report – Group 11
+
+User Interface Design
+The user interface is designed to provide a simple and user-friendly experience for interacting with the cancer detection system. The interface enables users to upload medical images, initiate cancer detection, and view prediction results without requiring technical expertise.
+
+The main interfaces of the system include:
+Home Page
+The home page introduces the AI-Based Multi-Cancer Detection System and provides navigation to the cancer detection module.
+
+
+
+
+
+
+
+
+
+                                  Figure 4.1 – Home Page
+
+Image Upload Page
+This page allows users to upload breast, skin, oral or lung medical images for analysis.
+
+
+
+
+
+
+                              Figure 4.2 – Image Upload Interface
+Project Report – Group 11
+
+Prediction Result Page
+After processing the uploaded image, the system displays the predicted cancer class together with the confidence score.
+
+
+
+
+
+
+
+
+
+
+
+                   Figure 4.3 – Prediction Results
+
+Grad-CAM Visualization Page
+The system generates a Grad-CAM heatmap to highlight the image regions that contributed most to the prediction.
+
+
+
+
+
+
+
+
+
+
+
+                Figure 4.4 – Grad-CAM Visualization
+Project Report – Group 11
+
+Reports Generated
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Project Report – Group 11
+
+ Discussion and Conclusion
+Discussion on the process followed during the project
+
+
+
+
+
+
+
+
+
+
+Conclusions drawn
+
+
+
+
+
+
+
+
+
+
+
+Project Report – Group 11
+
+Future Work
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Project Report – Group 11
+
+References
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Project Report – Group 11
+
+
+Project Supervisor :
+
+
+------------------------
+(Signature)
+07/  /2026 Date
