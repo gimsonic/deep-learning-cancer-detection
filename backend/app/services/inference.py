@@ -269,6 +269,97 @@ def predict(cancer_type: str, image_array: np.ndarray) -> dict:
     }
 
 
+# ── Lung-specific 2-stage inference (Vidmal's softmax CT model) ───────────────
+def predict_lung(image_array: np.ndarray) -> dict:
+    """Run Vidmal's 2-stage lung nodule pipeline.
+
+    Handles the specific differences from the generic predict():
+    - Model output is softmax (2 values), not sigmoid (1 value)
+    - Stage 1 output: [P(normal), P(abnormal)]  → we read index 1
+    - Stage 2 output: [P(benign), P(malignant)] → we read index 1
+    - Input shape must be (1, 47, 47, 5)
+    """
+    cfg = CANCER_CONFIGS.get("lung")
+    if cfg is None:
+        raise ValueError("Lung cancer config not found")
+
+    cancer_models = _registry.get("lung", {})
+    m1 = cancer_models.get("stage1")
+    m2 = cancer_models.get("stage2")
+
+    # ── Stage 1: Normal vs Abnormal ──────────────────────────────────────────
+    s1_cfg = cfg["stage1"]
+    threshold = s1_cfg["threshold"]
+
+    if m1 is None:
+        # Mock mode — model not loaded
+        return {
+            "cancer_type": "lung",
+            "stage1_label": s1_cfg["classes"][0],
+            "stage1_confidence": 0.0,
+            "stage2_label": None,
+            "stage2_confidence": None,
+            "is_mock": True,
+            "message": "Lung model not loaded — showing placeholder result.",
+        }
+
+    # Softmax output: [P(normal), P(abnormal)]
+    p1 = m1.predict(image_array, verbose=0)[0]   # shape: (2,)
+    p_normal   = float(p1[0])
+    p_abnormal = float(p1[1])
+
+    if p_abnormal < threshold:
+        # Stage 1 says normal → stop here
+        return {
+            "cancer_type": "lung",
+            "stage1_label": "normal",
+            "stage1_confidence": round(p_normal, 4),
+            "stage2_label": None,
+            "stage2_confidence": None,
+            "is_mock": False,
+            "message": "No suspicious nodule detected.",
+        }
+
+    # ── Stage 2: Benign vs Malignant ─────────────────────────────────────────
+    s2_cfg = cfg.get("stage2")
+
+    if s2_cfg is None or m2 is None:
+        # Stage 2 not configured or not loaded
+        return {
+            "cancer_type": "lung",
+            "stage1_label": "abnormal",
+            "stage1_confidence": round(p_abnormal, 4),
+            "stage2_label": None,
+            "stage2_confidence": None,
+            "is_mock": m2 is None,
+            "message": "Abnormal nodule detected. Stage 2 not available.",
+        }
+
+    # Softmax output: [P(benign), P(malignant)]
+    p2 = m2.predict(image_array, verbose=0)[0]   # shape: (2,)
+    p_benign    = float(p2[0])
+    p_malignant = float(p2[1])
+
+    s2_threshold = s2_cfg["threshold"]
+    if p_malignant >= s2_threshold:
+        s2_label = "malignant"
+        s2_confidence = round(p_malignant, 4)
+    else:
+        s2_label = "benign"
+        s2_confidence = round(p_benign, 4)
+
+    return {
+        "cancer_type": "lung",
+        "stage1_label": "abnormal",
+        "stage1_confidence": round(p_abnormal, 4),
+        "stage2_label": s2_label,
+        "stage2_confidence": s2_confidence,
+        "is_mock": False,
+        "message": "Suspicious nodule detected.",
+    }
+
+
+
 def predict_histopathology(image_array: np.ndarray) -> dict:
     """
     Run the Stage 3 histopathology model for oral cancer.

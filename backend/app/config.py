@@ -65,18 +65,18 @@ CANCER_CONFIGS: dict = {
     },
     "oral": {
         "stage1": {
-            "path": MODELS_DIR / "oral_efficientnetb3_model_1.keras", 
+            "path": MODELS_DIR / "siluni_stage1_mobilenetv2.keras", 
             "threshold": 0.5,
             "classes": ["abnormal", "normal"],
         },
         "stage2": {
-            "path": MODELS_DIR / "oral_efficientnetb3_model_2.keras", 
+            "path": MODELS_DIR / "siluni_stage2_oral.keras", 
             "threshold": 0.5,
             "classes": ["benign", "malignant"],
         },
         "stage3": {
             # Histopathology model for tissue-level malignancy confirmation
-            "path": MODELS_DIR / "oral_histo_oscc_efficientnetb0.keras",
+            "path": MODELS_DIR / "siluni_oscc_efficientnetb0.keras",
             "threshold": 0.5,
             "classes": ["Non-Cancerous", "Cancerous"],
         },

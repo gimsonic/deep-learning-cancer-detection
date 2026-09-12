@@ -56,3 +56,34 @@ def preprocess_image(
     # final output shape: (1, 224, 224, 1) for grayscale 
     #                     (1, 224, 224, 3) for RGB
     return arr
+
+
+# ── Lung-specific preprocessor for Vidmal's CT nodule model ──────────────────
+def preprocess_lung_image(file_bytes: bytes) -> np.ndarray:
+    """Preprocess a single CT slice image for Vidmal's 47×47×5 nodule model.
+
+    The model was trained on 47×47 crops with 5 consecutive CT slices as
+    channels. Since we only have a single uploaded slice, we resize to 47×47
+    grayscale and stack 5 identical copies to match the expected input shape.
+
+    Preprocessing mirrors the training pipeline in two_stage_pipeline.py:
+        x = crop.astype("float32")[None, ...] / 255.0
+
+    Returns:
+        np.ndarray of shape (1, 47, 47, 5), dtype float32, values in [0, 1]
+    """
+    # Open as grayscale (CT images are single-channel)
+    image = Image.open(BytesIO(file_bytes)).convert("L")
+
+    # Resize to 47×47 to match model input
+    image = image.resize((47, 47), Image.LANCZOS)
+    arr = np.array(image, dtype=np.uint8)  # shape: (47, 47)
+
+    # Stack 5 identical copies to simulate 5 consecutive CT slices
+    arr5 = np.stack([arr] * 5, axis=-1)   # shape: (47, 47, 5)
+
+    # Normalize to [0, 1] — matches training pipeline's / 255.0
+    arr5 = arr5.astype(np.float32) / 255.0
+
+    # Add batch dimension → (1, 47, 47, 5)
+    return np.expand_dims(arr5, axis=0)

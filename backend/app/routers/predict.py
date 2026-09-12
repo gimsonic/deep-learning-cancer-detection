@@ -9,7 +9,7 @@ from app.config import CANCER_CONFIGS, SUPPORTED_CANCER_TYPES
 from app.schemas import PredictionResponse, HistopathologyResponse, SynopsisRequest, SynopsisResponse
 from app.services import inference
 from app.services.synopsis import generate_synopsis
-from app.utils.image_preprocess import preprocess_image
+from app.utils.image_preprocess import preprocess_image, preprocess_lung_image
 
 # Create a FastAPI router for prediction endpoints with a common prefix and tags
 router = APIRouter(prefix="/predict", tags=["Prediction"])
@@ -142,6 +142,12 @@ async def predict_cancer(
     try:
         cfg = CANCER_CONFIGS[cancer_type]
         file_bytes = await file.read()
+
+        # ── LUNG CANCER: use Vidmal's 47×47×5 CT nodule pipeline ──
+        if cancer_type == "lung":
+            image_array = preprocess_lung_image(file_bytes)
+            result = inference.predict_lung(image_array)
+            return PredictionResponse(**result)
 
         # ── BREAST CANCER: use new patch-based pipeline ──
         if cancer_type == "breast":
